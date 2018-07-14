@@ -1,0 +1,33 @@
+{
+  "name": "mmxs/swagger-ui-bundle",
+  "type": "symfony-bundle",
+  "description": "Symfony swagger ui bundle",
+  "keywords": [
+    "swagger-ui"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Chen Ming Ming",
+      "email": "mingming0929@139.com"
+    }
+  ],
+  "require": {
+    "php": "^7.2",
+    "symfony/framework-bundle": "~4.1"
+  },
+  "require-dev": {
+    "symfony/yaml": "~4.0",
+    "phpunit/phpunit": "^6.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ming\\Bundles\\SwaggerBundle\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Test\\": "tests/"
+    }
+  }
+}
