@@ -10,7 +10,6 @@ namespace Ming\Bundles\SwaggerBundle\DependencyInjection;
 
 use Ming\Bundles\SwaggerBundle\Controller\SwaggerController;
 use Ming\Bundles\SwaggerBundle\Loader\Loader;
-use Ming\Bundles\SwaggerBundle\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
@@ -36,9 +35,10 @@ class SwaggerExtension extends Extension
 
         $definition = new Definition();
         $definition->setClass(SwaggerController::class)
-            ->addArgument(new Reference(Loader::class));
+            ->addArgument(new Reference(Loader::class))
+            ->setPublic(true);
 
-        $container->setDefinition(SwaggerController::class, $definition);
+        $container->setDefinition('swagger.controller', $definition);
     }
 
 }

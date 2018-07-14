@@ -10,7 +10,6 @@ namespace Ming\Bundles\SwaggerBundle\Tests\Controller;
 
 use Ming\Bundles\SwaggerBundle\Controller\SwaggerController;
 use Ming\Bundles\SwaggerBundle\Tests\TestCase;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -20,11 +19,9 @@ class SwaggerControllerTest extends TestCase
     {
         $container = $this->getContainer();
 
-        $container->findDefinition(SwaggerController::class)
-            ->setPublic(true);
         $container->setParameter('kernel.root_dir',dirname(dirname(dirname(__DIR__))));
         $container->compile();
-        $controller = $container->get(SwaggerController::class);
+        $controller = $container->get('swagger.controller');
         $controller->setContainer($container);
         $res = $controller->swaggerHtmlAction();
 
@@ -33,9 +30,7 @@ class SwaggerControllerTest extends TestCase
 
     public function testSwaggerConfig(){
         $container = $this->getContainer();
-        $container->findDefinition(SwaggerController::class)
-            ->setPublic(true);
-        $controller = $container->get(SwaggerController::class);
+        $controller = $container->get('swagger.controller');
         $controller->setContainer($container);
 
         $res = $controller->swaggerConfigAction();

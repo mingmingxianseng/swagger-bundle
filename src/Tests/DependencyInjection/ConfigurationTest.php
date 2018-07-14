@@ -20,7 +20,7 @@ class ConfigurationTest extends TestCase
     {
         $container = $this->getContainer();
         $this->assertTrue($container->hasDefinition(Loader::class));
-        $this->assertTrue($container->hasDefinition(SwaggerController::class));
+        $this->assertTrue($container->hasDefinition('swagger.controller'));
 
         $expected = dirname(dirname(__DIR__)).'/Resources/view/swagger.html';
         $this->assertSame($expected
