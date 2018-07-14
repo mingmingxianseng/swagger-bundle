@@ -17,6 +17,7 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         $rootNode    = $treeBuilder->root('swagger');
+        $defaultTemplatePath = dirname(__DIR__).'/Resources/view/swagger.html';
         $rootNode
             ->children()
                 ->scalarNode('type')
@@ -27,7 +28,7 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->end()
                 ->scalarNode('template_path')
-                    ->defaultValue('%kernel.root_dir%/templates/swagger.html')
+                    ->defaultValue($defaultTemplatePath)
                 ->end()
                 ->arrayNode('paths')
                     ->isRequired()

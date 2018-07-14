@@ -22,8 +22,9 @@ class ConfigurationTest extends TestCase
         $this->assertTrue($container->hasDefinition(Loader::class));
         $this->assertTrue($container->hasDefinition(SwaggerController::class));
 
-        $this->assertSame(
-            '%kernel.root_dir%/templates/swagger.html', $container->getParameter('swagger.template_path')
+        $expected = dirname(dirname(__DIR__)).'/Resources/view/swagger.html';
+        $this->assertSame($expected
+            , $container->getParameter('swagger.template_path')
         );
     }
 
