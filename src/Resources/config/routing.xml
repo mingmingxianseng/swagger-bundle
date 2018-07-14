@@ -6,10 +6,10 @@
     <route id="_swagger.html" path="/swagger.html">
         <default key="_controller">swagger.controller::swaggerHtmlAction</default>
     </route>
-    <route id="_swagger.html" path="/swagger">
+    <route id="_swagger.html.root" path="/swagger">
         <default key="_controller">swagger.controller::swaggerHtmlAction</default>
     </route>
-    <route id="_swagger.config" path="/swagger.json">
+    <route id="_swagger.config.json" path="/swagger.json">
         <default key="_controller">swagger.controller::swaggerConfigAction</default>
     </route>
 
