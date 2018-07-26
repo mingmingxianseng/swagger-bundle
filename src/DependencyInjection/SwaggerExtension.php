@@ -37,6 +37,7 @@ class SwaggerExtension extends Extension
             $container->setDefinition('swagger.' . $name, $definition);
             if ($flag === false && !isset($groups['default'])) {
                 $container->setAlias('swagger.default', new Alias('swagger.' . $name, true));
+                $flag = true;
             }
         }
         $definition = new Definition(SwaggerController::class);

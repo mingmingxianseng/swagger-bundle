@@ -34,7 +34,7 @@ class SwaggerController extends Controller
         $content     = file_get_contents($swagger->getTemplatePath());
         $replacement = './swagger.json';
 
-        if ($swagger->getName() !== 'default') {
+        if ($request->query->has('group')) {
             $replacement .= '?group=' . $request->query->get('group');
         }
 

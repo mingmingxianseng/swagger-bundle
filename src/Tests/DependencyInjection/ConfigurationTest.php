@@ -96,7 +96,14 @@ class ConfigurationTest extends TestCase
                             __DIR__ . '/demo.json',
                             __DIR__ . '/demo2.json'
                         ],
-                    ]
+                    ],
+                    [
+                        'name'  => 'admin',
+                        'paths' => [
+                            __DIR__ . '/demo.json',
+                            __DIR__ . '/demo2.json'
+                        ],
+                    ],
                 ]
             ]
         ];
@@ -104,8 +111,13 @@ class ConfigurationTest extends TestCase
 
         $def  = $container->findDefinition('swagger.default');
         $def2 = $container->findDefinition('swagger.main');
+        $def3 = $container->findDefinition('swagger.admin');
 
         $this->assertSame($def->getArguments(), $def2->getArguments());
+
+        $this->assertSame('admin', $def3->getArgument(0));
+        $this->assertSame('main', $def2->getArgument(0));
+        $this->assertSame('main', $def->getArgument(0));
 
         $this->assertTrue($container->hasAlias('swagger.default'));
     }
