@@ -8,50 +8,76 @@
 
 namespace Ming\Bundles\SwaggerBundle\Controller;
 
-use Ming\Bundles\SwaggerBundle\Loader\Loader;
+use Ming\Bundles\SwaggerBundle\Swagger\Swagger;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class SwaggerController extends Controller
 {
-    /**
-     * @var Loader
-     */
-    private $loader;
-
-    public function __construct(Loader $loader)
-    {
-
-        $this->loader = $loader;
-    }
-
     /**
      * swaggerHtmlAction
      *
      * @author chenmingming
      *
      *
+     * @param Request $request
+     *
      * @return Response
      */
-    public function swaggerHtmlAction()
+    public function swaggerHtmlAction(Request $request)
     {
-        $templatePath = $this->getParameter('swagger.template_path');
-        if (!is_file($templatePath) || !is_readable($templatePath)) {
-            throw new BadRequestHttpException("swagger 模板文件缺失".$templatePath);
+        /** @var Swagger $swagger */
+        $swagger = $this->getSwagger($request->query->get('group', 'default'));
+
+        $content     = file_get_contents($swagger->getTemplatePath());
+        $replacement = './swagger.json';
+
+        if ($swagger->getName() !== 'default') {
+            $replacement .= '?group=' . $request->query->get('group');
         }
 
-        return new Response(file_get_contents($templatePath));
+        return new Response(str_replace("__URL__", $replacement, $content));
     }
 
     /**
      * swaggerConfigAction
+     *
      * @author chenmingming
+     *
+     * @param Request $request
+     *
      * @return JsonResponse
      */
-    public function swaggerConfigAction()
+    public function swaggerConfigAction(Request $request)
     {
-        return new JsonResponse($this->loader->load());
+        /** @var Swagger $swagger */
+        $swagger = $this->getSwagger($request->query->get('group', 'default'));
+
+        return new JsonResponse($swagger->getData());
+    }
+
+    /**
+     * getSwagger
+     *
+     * @author chenmingming
+     *
+     * @param $group
+     *
+     * @return Swagger
+     */
+    private function getSwagger($group)
+    {
+        $serviceName = 'swagger.' . $group;
+
+        if (!$this->has($serviceName)) {
+            $serviceName = 'swagger.default';
+        }
+
+        /** @var Swagger $swagger */
+        $swagger = $this->get($serviceName);
+
+        return $swagger;
     }
 }

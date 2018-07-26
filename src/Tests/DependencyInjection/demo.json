@@ -1,8 +1,9 @@
 {
   "swagger": 2.0,
-  "paths": [
-    {
-      "/api/test": {}
-    }
+  "paths": {
+    "/api/test": {}
+  },
+  "schemes": [
+    "http"
   ]
 }

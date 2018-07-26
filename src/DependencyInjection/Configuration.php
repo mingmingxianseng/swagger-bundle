@@ -17,27 +17,39 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         $rootNode    = $treeBuilder->root('swagger');
-        $defaultTemplatePath = dirname(__DIR__).'/Resources/view/swagger.html';
+
         $rootNode
             ->children()
-                ->scalarNode('type')
-                    ->defaultValue('yaml')
-                    ->validate()
-                        ->ifNotInArray(array('json', 'yaml'))
-                        ->thenInvalid('The type of swagger config file has to be json or yaml,default to yaml')
-                    ->end()
-                ->end()
                 ->scalarNode('template_path')
-                    ->defaultValue($defaultTemplatePath)
+                    ->defaultValue(dirname(__DIR__).'/Resources/view/swagger.html')
                 ->end()
                 ->arrayNode('paths')
-                    ->isRequired()
                     ->prototype('scalar')
+                        ->validate()
+                            ->ifTrue(function($v){
+                                return !glob($v);
+                            })
+                            ->thenInvalid('path %s must be a readable file or readable dir.')
+                        ->end()
+                    ->end()
                 ->end()
-            ->end()
-        ->end();
+                ->arrayNode('groups')
+                    ->useAttributeAsKey('name')
+                    ->prototype('array')
+                        ->children()
+                            ->scalarNode('template_path')->end()
+                            ->arrayNode('paths')->isRequired()
+                                ->prototype('scalar')
+                                    ->validate()
+                                        ->ifTrue(function($v){
+                                            return !glob($v);
+                                        })
+                                        ->thenInvalid('paths element must be a file or dir')
+                                    ->end()
+                                ->end()
+                            ->end();
+
 
         return $treeBuilder;
     }
-
 }

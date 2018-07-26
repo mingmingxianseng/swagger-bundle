@@ -8,90 +8,105 @@
 
 namespace Ming\Bundles\SwaggerBundle\Tests\DependencyInjection;
 
-use Ming\Bundles\SwaggerBundle\Controller\SwaggerController;
-use Ming\Bundles\SwaggerBundle\Loader\Loader;
+use Ming\Bundles\SwaggerBundle\DependencyInjection\Configuration;
+use Ming\Bundles\SwaggerBundle\DependencyInjection\SwaggerExtension;
 use Ming\Bundles\SwaggerBundle\Tests\TestCase;
-use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class ConfigurationTest extends TestCase
 {
 
-    public function testCase()
+    public function testConfiguration()
     {
+        $processor = new Processor();
+        $configs   = [
+            'swagger' => [
+                'paths'  => [
+                    __DIR__ . '/demo.json'
+                ],
+                'groups' => [
+                    [
+                        'name'  => 'sss',
+                        'paths' => [
+                            __DIR__ . '/demo.json'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $configs = $processor->processConfiguration(new Configuration(), $configs);
+
+        $this->assertArrayHasKey('paths', $configs);
+        $this->assertArrayHasKey('groups', $configs);
+    }
+
+    public function testConfiguration2()
+    {
+        $processor = new Processor();
+        $configs   = [
+            'swagger' => [
+                'groups' => [
+                    [
+                        'name'  => 'sss',
+                        'paths' => [
+                            __DIR__ . '/demo.json'
+                        ]
+                    ],
+                    'ddd' => [
+                        'paths' => [
+                            __DIR__ . '/demo.json'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $configs = $processor->processConfiguration(new Configuration(), $configs);
+
+        $this->assertArrayHasKey('groups', $configs);
+        $this->assertSame([], $configs['paths']);
+    }
+
+    public function testAlias()
+    {
+
         $container = $this->getContainer();
-        $this->assertTrue($container->hasDefinition(Loader::class));
-        $this->assertTrue($container->hasDefinition('swagger.controller'));
 
-        $expected = dirname(dirname(__DIR__)).'/Resources/view/swagger.html';
-        $this->assertSame($expected
-            , $container->getParameter('swagger.template_path')
-        );
+        $def  = $container->findDefinition('swagger.default');
+        $def2 = $container->findDefinition('swagger.main');
+
+        $this->assertSame('main', $def2->getArgument(0));
+        $this->assertSame('default', $def->getArgument(0));
+        $this->assertTrue($container->hasDefinition('swagger.default'));
     }
 
-    /**
-     * testJson
-     *
-     * @author  chenmingming
-     * @throws \Exception
-     */
-    public function testJson()
+    public function test2()
     {
-        $container  = $this->getContainer();
-        $definition = $container->findDefinition(Loader::class);
-        $definition->setPublic(true)
-            ->setArgument(0, 'json')
-            ->setArgument(1, [__DIR__ . '/demo.json']);
 
-        $loader   = $container->get(Loader::class);
-        $config   = $loader->load();
-        $content  = file_get_contents(__DIR__ . '/demo.json');
-        $expected = json_encode(json_decode($content, true));
-        $this->assertSame($expected, json_encode($config));
-    }
+        $container = new ContainerBuilder();
+        $loader    = new SwaggerExtension();
+        $config    = [
+            'swagger' => [
+                'groups' => [
+                    [
+                        'name'  => 'main',
+                        'paths' => [
+                            __DIR__ . '/demo.json',
+                            __DIR__ . '/demo2.json'
+                        ],
+                    ]
+                ]
+            ]
+        ];
+        $loader->load($config, $container);
 
-    /**
-     * testJson
-     *
-     * @author  chenmingming
-     * @throws \Exception
-     */
-    public function testInvalidJson()
-    {
-        $container  = $this->getContainer();
-        $definition = $container->findDefinition(Loader::class);
-        $definition->setPublic(true)
-            ->setArgument(0, 'json')
-            ->setArgument(
-                1, [
-                     __DIR__ . '/error.json'
-                 ]
-            );
+        $def  = $container->findDefinition('swagger.default');
+        $def2 = $container->findDefinition('swagger.main');
 
-        $loader = $container->get(Loader::class);
-        $this->expectException(\InvalidArgumentException::class);
-        $loader->load();
-    }
+        $this->assertSame($def->getArguments(), $def2->getArguments());
 
-    /**
-     * testYaml
-     *
-     * @author  chenmingming
-     *
-     * @throws \Exception
-     */
-    public function testYaml()
-    {
-        $container  = $this->getContainer();
-        $definition = $container->findDefinition(Loader::class);
-        $definition->setPublic(true)
-            ->setArgument(0, 'yaml')
-            ->setArgument(1,[__DIR__.'/*']);
-
-        $loader  = $container->get(Loader::class);
-        $config  = $loader->load();
-        $content = file_get_contents(__DIR__ . '/demo.yaml');
-
-        $expected = json_encode(Yaml::parse($content));
-        $this->assertSame($expected, json_encode($config));
+        $this->assertTrue($container->hasAlias('swagger.default'));
     }
 }

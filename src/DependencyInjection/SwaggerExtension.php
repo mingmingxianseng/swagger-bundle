@@ -9,10 +9,10 @@
 namespace Ming\Bundles\SwaggerBundle\DependencyInjection;
 
 use Ming\Bundles\SwaggerBundle\Controller\SwaggerController;
-use Ming\Bundles\SwaggerBundle\Loader\Loader;
+use Ming\Bundles\SwaggerBundle\Swagger\Swagger;
+use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 class SwaggerExtension extends Extension
@@ -21,23 +21,27 @@ class SwaggerExtension extends Extension
     {
         $configuration = $this->getConfiguration($configs, $container);
         $config        = $this->processConfiguration($configuration, $configs);
+        $groups        = $config['groups'];
+        if ($config['paths']) {
+            $groups['default'] = ['paths' => $config['paths']];
+        }
+        $flag = false;
+        foreach ($groups as $name => $group) {
+            $definition = new Definition();
+            $definition->setClass(Swagger::class)
+                ->addArgument($name)
+                ->addArgument($group['paths'])
+                ->addArgument($group['template_path'] ?? $config['template_path'])
+                ->setPublic(true);
 
-        $container->setParameter('swagger.type', $config['type']);
-        $container->setParameter('swagger.paths', $config['paths']);
-        $container->setParameter('swagger.template_path', $config['template_path']);
+            $container->setDefinition('swagger.' . $name, $definition);
+            if ($flag === false && !isset($groups['default'])) {
+                $container->setAlias('swagger.default', new Alias('swagger.' . $name, true));
+            }
+        }
+        $definition = new Definition(SwaggerController::class);
 
-        $definition = new Definition();
-        $definition->setClass(Loader::class)
-            ->addArgument($config['type'])
-            ->addArgument($config['paths']);
-
-        $container->setDefinition(Loader::class, $definition);
-
-        $definition = new Definition();
-        $definition->setClass(SwaggerController::class)
-            ->addArgument(new Reference(Loader::class))
-            ->setPublic(true);
-
+        $definition->setPublic(true);
         $container->setDefinition('swagger.controller', $definition);
     }
 

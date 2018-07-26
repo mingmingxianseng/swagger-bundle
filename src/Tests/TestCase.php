@@ -19,9 +19,18 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         $loader    = new SwaggerExtension();
         $config    = [
             'swagger' => [
-                'type'  => 'json',
-                'paths' => [
+                'paths'  => [
                     __DIR__ . '/DependencyInjection/demo.json'
+                ],
+                'groups' => [
+                    [
+
+                        'name'  => 'main',
+                        'paths' => [
+                            __DIR__ . '/DependencyInjection/demo.json',
+                            __DIR__ . '/DependencyInjection/demo2.json'
+                        ],
+                    ]
                 ]
             ]
         ];
